@@ -88,8 +88,16 @@ local function DisplayChatBubbleOnFrame(f, message, msgType)
 	-- Update container positioning (in case nameplate moved)
 	UpdateContainerSize(f)
 	
-	-- Get chat color
+	-- Get chat color (check for custom colors first)
 	local chatColor = CHAT_COLORS[msgType] or {1, 1, 1, 1}
+	
+	-- Check for custom player colors
+	if mod.db.profile.filtering.custom_colors then
+		local senderName = f.name and f.name.text
+		if senderName and mod.db.profile.filtering.custom_colors[senderName] then
+			chatColor = mod.db.profile.filtering.custom_colors[senderName]
+		end
+	end
 	
 	-- Apply color to text
 	f.chatBubbles.text:SetTextColor(unpack(chatColor))
@@ -198,6 +206,24 @@ local function ShowChatOnNameplate(senderName, message, msgType)
 	-- Check if chat bubbles are enabled
 	if not mod.db.profile.enabled then
 		return
+	end
+	
+	-- Check filtering - blocked words and players
+	if mod.db.profile.filtering.enabled then
+		-- Check if player is blocked
+		if mod.db.profile.filtering.blocked_players and mod.db.profile.filtering.blocked_players[senderName] then
+			return
+		end
+		
+		-- Check if message contains blocked words
+		if mod.db.profile.filtering.blocked_words then
+			local lowerMessage = strlower(message)
+			for word, _ in pairs(mod.db.profile.filtering.blocked_words) do
+				if strfind(lowerMessage, strlower(word), 1, true) then
+					return
+				end
+			end
+		end
 	end
 	
 	-- Check chat type filters
@@ -333,141 +359,6 @@ function mod:Hide(msg, frame)
 end
 
 ------------------------------------------------------------ Module functions --
-function mod:GetOptions()
-	return {
-		enabled = {
-			type = "toggle",
-			name = L["Enable chat bubbles"],
-			desc = L["Show chat bubbles above nameplates when units speak in chat"],
-			order = 1,
-			disabled = false
-		},
-		display = {
-			type = "group",
-			name = L["Display"],
-			inline = true,
-			disabled = function()
-				return not self.db.profile.enabled
-			end,
-			order = 10,
-			args = {
-				max_width = {
-					type = "range",
-					name = L["Max width"],
-					desc = L["Maximum width of chat bubbles before text wrapping occurs"],
-					order = 10,
-					step = 10,
-					min = 100,
-					max = 500,
-					softMin = 200,
-					softMax = 400
-				},
-				duration = {
-					type = "range",
-					name = L["Duration"],
-					desc = L["How long chat bubbles stay visible (in seconds)"],
-					order = 20,
-					step = 0.5,
-					min = 0.5,
-					max = 10,
-					softMin = 1,
-					softMax = 8
-				},
-				y_offset = {
-					type = "range",
-					name = L["Y offset"],
-					desc = L["Vertical position adjustment for chat bubbles"],
-					order = 30,
-					step = 1,
-					min = -50,
-					max = 50
-				},
-				font_size = {
-					type = "range",
-					name = L["Font size"],
-					desc = L["Size of the chat bubble text"],
-					order = 40,
-					step = 1,
-					min = 6,
-					max = 24,
-					softMin = 8,
-					softMax = 20
-				}
-			}
-		},
-		combat = {
-			type = "group",
-			name = L["Combat"],
-			inline = true,
-			disabled = function()
-				return not self.db.profile.enabled
-			end,
-			order = 20,
-			args = {
-				hide_in_combat = {
-					type = "toggle",
-					name = L["Hide in combat"],
-					desc = L["Hide chat bubbles when in combat"],
-					order = 10
-				},
-				hide_in_pvp = {
-					type = "toggle",
-					name = L["Hide in PvP"],
-					desc = L["Hide chat bubbles when in PvP areas"],
-					order = 20
-				}
-			}
-		},
-		chat_types = {
-			type = "group",
-			name = "Chat Types",
-			inline = true,
-			disabled = function()
-				return not self.db.profile.enabled
-			end,
-			order = 30,
-			args = {
-				show_say = {
-					type = "toggle",
-					name = L["Show SAY"],
-					desc = L["Show SAY messages in chat bubbles"],
-					order = 10
-				},
-				show_yell = {
-					type = "toggle",
-					name = L["Show YELL"],
-					desc = L["Show YELL messages in chat bubbles"],
-					order = 20
-				},
-				show_party = {
-					type = "toggle",
-					name = L["Show PARTY"],
-					desc = L["Show PARTY messages in chat bubbles"],
-					order = 30
-				},
-				show_guild = {
-					type = "toggle",
-					name = L["Show GUILD"],
-					desc = L["Show GUILD messages in chat bubbles"],
-					order = 40
-				},
-				show_raid = {
-					type = "toggle",
-					name = L["Show RAID"],
-					desc = L["Show RAID messages in chat bubbles"],
-					order = 50
-				},
-				show_monster = {
-					type = "toggle",
-					name = L["Show monster messages"],
-					desc = L["Show NPC say and yell messages in chat bubbles"],
-					order = 60
-				}
-			}
-		}
-	}
-end
-
 function mod:OnInitialize()
 	self.db = addon.db:RegisterNamespace(self.moduleName, {
 		profile = {
@@ -485,6 +376,13 @@ function mod:OnInitialize()
 				show_guild = true,
 				show_raid = false,
 				show_monster = true
+			},
+			filtering = {
+				enabled = false,
+				blocked_words = {},
+				blocked_players = {},
+				custom_colors = {},
+				color_target = ""
 			}
 		}
 	})
