@@ -917,7 +917,59 @@ do
 						}
 					}
 				}
+			},
+			--[[ MOVED TO Kui_Nameplates_ChatBubble ADDON
+			chatbubbles = {
+				type = "group",
+				name = "Chat bubbles",
+				order = 60,
+				args = {
+					enable = {
+						type = "toggle",
+						name = "Enable chat bubbles",
+						desc = "Show chat bubbles above nameplates",
+						order = 10
+					},
+					hide_in_combat = {
+						type = "toggle",
+						name = "Hide in combat", 
+						desc = "Hide chat bubbles when in combat",
+						order = 20,
+						disabled = function()
+							return not addon.db.profile.chatbubbles.enable
+						end
+					},
+					font_size = {
+						type = "range",
+						name = "Font size",
+						desc = "Size of the chat bubble text",
+						order = 30,
+						step = 1,
+						min = 6,
+						max = 24,
+						softMin = 8,
+						softMax = 20,
+						disabled = function()
+							return not addon.db.profile.chatbubbles.enable
+						end
+					},
+					duration = {
+						type = "range",
+						name = "Duration",
+						desc = "How long chat bubbles stay visible (in seconds)",
+						order = 40,
+						step = 0.5,
+						min = 0.5,
+						max = 10,
+						softMin = 1,
+						softMax = 8,
+						disabled = function()
+							return not addon.db.profile.chatbubbles.enable
+						end
+					}
+				}
 			}
+			--]]
 		}
 	}
 

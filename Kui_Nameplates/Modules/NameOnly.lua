@@ -16,6 +16,7 @@ local utf8sub = LibStub("Kui-1.0").utf8sub
 local orig_SetName
 
 local color_friendly
+local color_neutral
 
 local PositionRaidIcon = {
 	function(f) return f.icon:SetPoint("RIGHT", f.name, "LEFT", -2, 2) end,
@@ -48,8 +49,15 @@ local function SwitchOn(f)
 	f.nameonly = true
 
 	if not f.player and f.friend then
-		-- color NPC names
-		f.name:SetTextColor(unpack(color_friendly))
+		-- Check if this is a neutral unit (yellow health bar)
+		local r, g, b = f.oldHealth:GetStatusBarColor()
+		if (r + g) > 1.8 and b == 0 then
+			-- neutral unit - color yellow
+			f.name:SetTextColor(unpack(color_neutral))
+		else
+			-- regular friendly unit - use friendly color
+			f.name:SetTextColor(unpack(color_friendly))
+		end
 	end
 
 	if mod.db.profile.display.hidecastbars then
@@ -224,6 +232,12 @@ function mod:GetOptions()
 				return not mod.db.profile.enabled
 			end,
 			args = {
+				includeneutral = {
+					type = "toggle",
+					name = L["Include neutral units"],
+					desc = L["Also apply name-only display to neutral units (yellow nameplates)."],
+					order = 5
+				},
 				ondamaged = {
 					type = "toggle",
 					name = L["Even when damaged"],
@@ -282,6 +296,11 @@ function mod:GetOptions()
 					type = "color",
 					name = L["Friendly"],
 					order = 1
+				},
+				neutral = {
+					type = "color",
+					name = L["Neutral"],
+					order = 2
 				}
 			}
 		}
@@ -289,11 +308,13 @@ function mod:GetOptions()
 end
 function mod:configChangedListener()
 	color_friendly = self.db.profile.colors.friendly
+	color_neutral = self.db.profile.colors.neutral
 end
 function mod:OnInitialize()
 	self.db = addon.db:RegisterNamespace(self.moduleName, {profile = {
 		enabled = true,
 		display = {
+			includeneutral = false,
 			ondamaged = false,
 			hidecastbars = true,
 			fontsize = 11,
@@ -301,7 +322,8 @@ function mod:OnInitialize()
 			fontsizetrivial = 9
 		},
 		colors = {
-			friendly = {.6, 1, 0.6}
+			friendly = {.6, 1, 0.6},
+			neutral = {1, 1, 0}
 		}
 	}})
 

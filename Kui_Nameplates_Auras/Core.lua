@@ -305,10 +305,10 @@ local function UpdateButtonDuration(button, duration)
     if button.cooldown then
         if button.duration and button.duration > 0 and button.expirationTime then
             local start = button.expirationTime - button.duration
-            button.cooldown:SetCooldown(start, button.duration)
-            button.cooldown:Show()
+            --button.cooldown:SetCooldown(start, button.duration) --rzr disabled default cooldown frame usage	
+            --button.cooldown:Show()								-- same
         else
-            button.cooldown:Hide()
+            --button.cooldown:Hide()							-- same
         end
     end
 

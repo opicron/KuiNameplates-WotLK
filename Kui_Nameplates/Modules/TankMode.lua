@@ -337,7 +337,7 @@ function mod:OnInitialize()
 		},
 		brackets = {
 			enable_brackets = true,
-			scale = 1
+			scale = 0.5
 		}
 	}})
 

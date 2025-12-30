@@ -19,6 +19,7 @@ local select, pairs, ipairs, type = select, pairs, ipairs, type
 local unpack, floor = unpack, math.floor
 local strfind, strsplit, tinsert = strfind, strsplit, tinsert
 local UnitExists = UnitExists
+
 -- non-laggy, pixel perfect positioning (Semlar's) #############################
 local function SizerOnSizeChanged(self, x, y)
 	-- because :Hide bubbles up and triggers the OnHide script of any elements
@@ -90,7 +91,13 @@ local function SetHealthColor(self, sticky, r, g, b)
 			r, g, b = unpack(profile_hp.reactioncolors.hatedcol)
 		elseif (r + g) > 1.8 and b == 0 then
 			-- neutral NPC
-			self.friend = nil
+			-- Check if NameOnly module wants neutral units treated as friendly
+			local nameOnlyMod = addon:GetModule("NameOnly", true)
+			if nameOnlyMod and nameOnlyMod.db and nameOnlyMod.db.profile.enabled and nameOnlyMod.db.profile.display.includeneutral then
+				self.friend = true
+			else
+				self.friend = nil
+			end
 			r, g, b = unpack(profile_hp.reactioncolors.neutralcol)
 		elseif r < 0.6 and (r + g) == (r + b) then
 			-- tapped NPC
@@ -147,9 +154,15 @@ local function GetDesiredAlpha(frame)
 		return 1
 	end
 
+	if frame.chatBubbles and frame.chatBubbles:IsVisible() then
+		-- avoid fading when chat bubble is visible
+		return 1
+	end
+
 	if UnitExists("target") then
 		return frame.defaultAlpha == 1 and 1 or profile_fade.fadedalpha
 	else
+		--return 1
 		-- default when there is no target
 		return profile_fade.fadeall and profile_fade.fadedalpha or 1
 	end
@@ -377,6 +390,19 @@ local function OnFrameUpdate(self, e)
 		end
 	else
 		f:SetAlpha(f.currentAlpha)
+	end
+
+	-- Handle aura frame visibility based on health bar visibility (primary check) --RZR
+	if f.auras then
+		if f.health and f.health:IsVisible() and (f.currentAlpha > 0 and f.defaultAlpha > 0) then
+			-- Health bar is visible and frame is not completely hidden - show auras if they have content --RZR
+			if f.auras.visible and f.auras.visible > 0 then
+				f.auras:Show()
+			end
+		else
+			-- Health bar is hidden OR frame is completely hidden - hide auras --RZR
+			f.auras:Hide()
+		end
 	end
 
 	-- call delayed updates
