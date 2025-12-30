@@ -1,6 +1,6 @@
 # KuiNameplates WoTLK
 
-Shoutout to Somewierdhuman for his Awesome WotLK patch! This is a modded version of his moddem Kui Nameplates addon.
+Shoutout to Somewierdhuman for his [Awesome_Wotlk](https://github.com/someweirdhuman/awesome_wotlk) patch! This is a modded version of his modded Kui Nameplates addon.
 
 * Added elite skulls and text (Level option needs to be enabled, default)
 * Added chat bubbles
