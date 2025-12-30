@@ -1,16 +1,24 @@
-# Kui_Nameplates (260) for _WoTLK_.
+# KuiNameplates WoTLK
 
-## Fork of https://github.com/bkader/KuiNameplates-WoTLK/tree/main 
+Shoutout to Somewierdhuman for his Awesome WotLK patch! This is a modded version of his moddem Kui Nameplates addon.
+
+* Added elite skulls and text (Level option needs to be enabled, default)
+* Added chat bubbles
+* Changed NameOnly module to hide neutral healthbars
+* Fade Auras when FadeName is used (and out of combat)
+
+Original addon highlights:
+
+* Auras work correctly on all nameplates
+* Castbars on all nameplates(!)
+* Faster/reliant code for nameplates (due to Awesome Wotlk patch)
+
+<img width="598" height="398" alt="image" src="https://github.com/user-attachments/assets/15ab6d19-1f07-4a20-8c10-66e28d8df646" />
 
 ## Install:
 
-1. [Download the package.](https://github.com/someweirdhuman/KuiNameplates335aCustom/archive/refs/heads/master.zip)
+1. Download
 2. Requires custom fork of [Awesome_Wotlk](https://github.com/someweirdhuman/awesome_wotlk) and game patched with it
-3. Place the folders `Kui_Nameplates`` Kui_Nameplates_Auras` to `Interface\AddOns`.
+3. Place the folders `Kui_*` in `Interface\AddOns`
 4. Enjoy!
 
-## Changes
-- Auras are always on nameplates and always updates
-- Better performance
-- Nameplates are created using unit added/removed events and auras update using these events
-- Combatlog parsing is no longer so bad as there is new API to simply grab unit token from guid and map it better, no more assumptions
