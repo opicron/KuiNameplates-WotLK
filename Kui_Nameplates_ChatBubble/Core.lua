@@ -257,8 +257,16 @@ local function ShowChatOnNameplate(senderName, message, msgType)
 				if plateName == senderName then
 					-- Validate this is actually the correct frame by checking if it's actively displayed
 					if nameplate:IsVisible() and nameplate.kui:GetAlpha() > 0 then
-						frame = nameplate
-						break
+						-- Check if nameplate center coordinates are valid (>= 1)
+						local centerX, centerY = nameplate.kui:GetCenter()
+						-- Output coordinates to chat when frame is found
+						--if centerX and centerY then
+							--print(format("Nameplate '%s' found at X: %.1f, Y: %.1f", plateName, centerX, centerY))
+						--end
+						if centerX and centerY and centerX >= 1 and centerY >= 1 then
+							frame = nameplate
+							break
+						end
 					end
 				end
 			end
@@ -300,7 +308,7 @@ function mod:Create(msg, frame)
 	
 	-- Create the actual visible bubble frame as child of container
 	frame.chatBubbles.bubbleFrame = CreateFrame("Frame", nil, frame.chatBubbles)
-	frame.chatBubbles.bubbleFrame:SetFrameStrata("TOOLTIP")
+	frame.chatBubbles.bubbleFrame:SetFrameStrata("LOW")
 	frame.chatBubbles.bubbleFrame:SetFrameLevel(3)
 	
 	-- Set proper chat bubble backdrop
